@@ -1,0 +1,9 @@
+// Global imports for Patternfly 4 components
+$pf-global--load-pf-3: false;
+$pf-global--enable-reset: false;
+$pf-global--fonticon-path: "~@patternfly/patternfly/assets/pficon";
+
+// Base imports
+@import "~@patternfly/patternfly/patternfly-addons.scss";
+@import "~@patternfly/patternfly/base/_base.scss";
+@import "~@patternfly/patternfly/base/_variables.scss";
