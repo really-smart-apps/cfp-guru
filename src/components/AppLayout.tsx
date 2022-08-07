@@ -46,8 +46,8 @@ export function AppLayout({ children }: IAppLayout) {
   const Header = (
     <PageHeader
       logoProps={logoProps}
-      logo="Logo"
-      className="cfp-guru-navbar"
+      logo="CFP Guru"
+      className="cfp-guru-header"
       topNav={PageNav}
     />
   );
