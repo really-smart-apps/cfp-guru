@@ -1,14 +1,12 @@
-import { Bullseye } from "@patternfly/react-core";
 import "@patternfly/react-core/dist/styles/base.css";
 import { AppLayout } from "./components/AppLayout";
+import { AppRoutes } from "./components/AppRoutes";
 import "./styles/App.scss";
 
 function App() {
   return (
     <AppLayout>
-      <Bullseye>
-        <div>Bullseye ◎ layout</div>
-      </Bullseye>
+      <AppRoutes />
     </AppLayout>
   );
 }

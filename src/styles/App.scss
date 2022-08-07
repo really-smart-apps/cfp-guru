@@ -20,3 +20,19 @@
 .pf-m-width-66 {
   width: 66%;
 }
+
+.home-tabs {
+  a.pf-c-nav__link.active {
+    color: var(--pf-c-nav__link--m-current--Color);
+    background-color: var(--pf-c-nav__link--m-current--BackgroundColor);
+    border-bottom-width: var(
+      --pf-c-nav__link--m-current--before--BorderBottomWidth
+    );
+  }
+}
+
+.font-size {
+  &-7vw {
+    font-size: 7vw !important;
+  }
+}
