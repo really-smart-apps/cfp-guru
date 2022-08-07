@@ -17,7 +17,7 @@ export function AppLayout({ children }: IAppLayout) {
   const header = (
     <Masthead id="basic">
       <MastheadMain>
-        <MastheadBrand>Logo</MastheadBrand>
+        <MastheadBrand>CFP Guru</MastheadBrand>
       </MastheadMain>
       <MastheadContent>
         <span>Content</span>
