@@ -3,27 +3,317 @@ import {
   Button,
   Card,
   CardBody,
-  CardFooter,
+  // CardFooter,
   CardTitle,
   Form,
   FormGroup,
+  Radio,
+  TextArea,
+  TextInput,
 } from "@patternfly/react-core";
+import { keys, map } from "lodash";
+import { useEffect, useState } from "react";
+import { ConferenceAttendeeMembers } from "../enum/conferenceAttendeeMembers";
+import { ConferenceCommitteeMembers } from "../enum/conferenceCommitteeMembers";
+import { ConferenceTypes } from "../enum/conferenceTypes";
+import { getCacheValue, IBaseCache } from "../utils/cacheUtils";
+import {
+  CFPFormCacheNamespaces,
+  CfpFormCacheUtils,
+} from "../utils/cfpFormCacheUtils";
+
+interface IConferenceFormState {
+  conferenceType: ConferenceTypes;
+  conferenceCommitteeMember: ConferenceCommitteeMembers;
+  conferenceAttendeeMember: ConferenceAttendeeMembers;
+  problem: string;
+  problemReason: string;
+  title: string;
+  titleProblemSolution: string;
+  takeways: string;
+}
+
+const initialConfFormState: IConferenceFormState = {
+  conferenceType: ConferenceTypes.FREE,
+  conferenceCommitteeMember: ConferenceCommitteeMembers.EXPERT_DOMAIN,
+  conferenceAttendeeMember: ConferenceAttendeeMembers.DIVERSE_INSIGHTS,
+  problem: "",
+  problemReason: "",
+  title: "",
+  titleProblemSolution: "",
+  takeways: "",
+};
+
+export async function getCfpFormCache(): Promise<IConferenceFormState> {
+  try {
+    const cacheValue = await CfpFormCacheUtils.get<
+      IBaseCache<IConferenceFormState>
+    >(CFPFormCacheNamespaces.CFP_FORM.name, "cfpform");
+
+    return getCacheValue(cacheValue);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function setCfpFormCache(
+  value: IConferenceFormState
+): Promise<void> {
+  try {
+    await CfpFormCacheUtils.set(
+      CFPFormCacheNamespaces.CFP_FORM.name,
+      "cfpform",
+      {
+        value: value,
+      }
+    );
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 export function CFPForm() {
+  const [conferenceFormState, setConferenceFormState] =
+    useState<IConferenceFormState>(initialConfFormState);
+  const isFreeTypeSelected =
+    ConferenceTypes.FREE === conferenceFormState.conferenceType;
+
+  const getCacheValue = async () => {
+    const cacheValue: IConferenceFormState = await getCfpFormCache();
+    setConferenceFormState({
+      ...conferenceFormState,
+      ...cacheValue,
+    });
+  };
+  useEffect(() => {
+    getCacheValue();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const onUpdateValue = (key: string, value: any) => {
+    const updatedObject = {
+      ...conferenceFormState,
+      [key]: value,
+    };
+    setConferenceFormState(updatedObject);
+    setCfpFormCache(updatedObject);
+  };
+  const handleProblemChange = (text: string) => {
+    onUpdateValue("problem", text);
+  };
+  const handleProblemReasonChange = (text: string) => {
+    onUpdateValue("problemReason", text);
+  };
+  const handleTitleChange = (text: string) => {
+    onUpdateValue("title", text);
+  };
+
+  const handleTakewaysChange = (text: string) => {
+    onUpdateValue("takeways", text);
+  };
+
+  const onChangeConferenceType = (_, event) => {
+    const { value } = event?.currentTarget;
+    onUpdateValue("conferenceType", value);
+  };
+
+  const onChangeConferenceCommitteeMember = (_, event) => {
+    const { value } = event?.currentTarget;
+    onUpdateValue("conferenceCommitteeMember", value);
+  };
+
+  const onChangeConferenceAttendeeMember = (_, event) => {
+    const { value } = event?.currentTarget;
+    onUpdateValue("conferenceAttendeeMember", value);
+  };
+
+  const handleTitleProblemSolutionChange = (text: string) => {
+    onUpdateValue("titleProblemSolution", text);
+  };
+
+  const onSubmitForm = () => {
+    console.log(conferenceFormState);
+  };
+
+  const onCancelForm = () => {
+    setConferenceFormState(initialConfFormState);
+    setCfpFormCache(initialConfFormState);
+  };
+
+  const renderConferenceTypeComponent = () => {
+    return (
+      <FormGroup
+        role="radiogroup"
+        isInline
+        fieldId="conferenceType-group"
+        label="What kind of conference is this?"
+        isRequired
+      >
+        {map(keys(ConferenceTypes), (key) => {
+          const value = ConferenceTypes[key];
+          return (
+            <Radio
+              key={key}
+              name={`organizerCommitteeMember${value}-radio`}
+              label={value}
+              id={`organizerCommitteeMember-radio${value}-01`}
+              value={value}
+              onChange={onChangeConferenceType}
+              isChecked={value === conferenceFormState.conferenceType}
+            />
+          );
+        })}
+      </FormGroup>
+    );
+  };
+
+  const renderFreeConferenceTypeComponent = () => {
+    return (
+      <FormGroup
+        role="radiogroup"
+        isInline
+        fieldId="organizerCommitteeMember-group"
+        label="Describe the average organizer/jury committee member for this conf?"
+        isRequired
+      >
+        {map(keys(ConferenceCommitteeMembers), (key) => {
+          const value = ConferenceCommitteeMembers[key];
+          return (
+            <Radio
+              key={key}
+              name={`organizerCommitteeMember${value}-radio`}
+              label={value}
+              id={`organizerCommitteeMember-radio${value}-01`}
+              value={value}
+              onChange={onChangeConferenceCommitteeMember}
+              isChecked={
+                value === conferenceFormState.conferenceCommitteeMember
+              }
+            />
+          );
+        })}
+      </FormGroup>
+    );
+  };
+
+  const renderPaidConferenceTypeComponent = () => {
+    return (
+      <FormGroup
+        role="radiogroup"
+        isInline
+        fieldId="organizerAttendeeMember-group"
+        label="Point out the value that this conference generates for the average attendee?"
+        isRequired
+      >
+        {map(keys(ConferenceAttendeeMembers), (key) => {
+          const value = ConferenceAttendeeMembers[key];
+          return (
+            <Radio
+              key={key}
+              name={`organizerAttendeeMember${value}-radio`}
+              label={value}
+              id={`organizerAttendeeMember-radio${value}-01`}
+              value={value}
+              onChange={onChangeConferenceAttendeeMember}
+              isChecked={value === conferenceFormState.conferenceAttendeeMember}
+            />
+          );
+        })}
+      </FormGroup>
+    );
+  };
+
   return (
-    <Card isFullHeight isPlain>
-      <CardTitle>Header</CardTitle>
+    <Card isPlain>
+      <CardTitle>Abstract generator</CardTitle>
       <CardBody>
-        <Form>
-          <FormGroup label="Cluster" fieldId="cluster-01"></FormGroup>
-          <FormGroup label="Project" fieldId="project-01"></FormGroup>
-          <FormGroup label="Console" fieldId="console-01"></FormGroup>
+        <Form isWidthLimited>
+          {renderConferenceTypeComponent()}
+          {isFreeTypeSelected && renderFreeConferenceTypeComponent()}
+          {!isFreeTypeSelected && renderPaidConferenceTypeComponent()}
+          <FormGroup
+            label="Describe the problem that your submission tries to address"
+            fieldId="confProblemTextarea"
+            isRequired
+            helperText={`"Just the problem" and why is it a problem for the average Organizer/Jury member <use selected radio from previous question>`}
+          >
+            <TextArea
+              value={conferenceFormState.problem}
+              onChange={handleProblemChange}
+              id="confProblemTextarea"
+              name="confProblemTextarea"
+            />
+          </FormGroup>
+
+          <FormGroup
+            label="Reasons for the problem"
+            fieldId="confProblemReasonTextarea"
+            helperText={`Describe the reasons (preferably in a list) that cause the problem that your paper tries to address`}
+            isRequired
+          >
+            <TextArea
+              value={conferenceFormState.problemReason}
+              onChange={handleProblemReasonChange}
+              id="confProblemReasonTextarea"
+              name="confProblemReasonTextarea"
+            />
+          </FormGroup>
+
+          <FormGroup
+            label="Title of the paper"
+            helperText="Name your paper in a way that addresses all the reasons that you listed in last question"
+            fieldId="confTitle"
+            isRequired
+          >
+            <TextInput
+              value={conferenceFormState.title}
+              isRequired
+              onChange={handleTitleChange}
+              id="confTitle"
+              name="confTitle"
+              type="text"
+              aria-describedby="Conference Title"
+            />
+          </FormGroup>
+
+          <FormGroup
+            label="Describe how your title is actually solving the problems you listed in question 3."
+            helperText="You can use - real world experience reports, case studies, research papers or your analysis as arguements."
+            fieldId="confTitleExplanation"
+            isRequired
+          >
+            <TextArea
+              value={conferenceFormState.titleProblemSolution}
+              onChange={handleTitleProblemSolutionChange}
+              id="confTitleExplanation"
+              name="confTitleExplanation"
+            />
+          </FormGroup>
+
+          <FormGroup
+            label="Takeways"
+            helperText="Repeat the top 3 key lessons from your paper."
+            fieldId="conf3Takeways"
+            isRequired
+          >
+            <TextArea
+              value={conferenceFormState.takeways}
+              onChange={handleTakewaysChange}
+              id="conf3Takeways"
+              name="conf3Takeways"
+            />
+          </FormGroup>
 
           <ActionGroup>
-            <Button variant="primary">Submit</Button>
+            <Button onClick={onSubmitForm} variant="primary">
+              Submit
+            </Button>
+            <Button onClick={onCancelForm} variant="link">
+              Cancel
+            </Button>
           </ActionGroup>
         </Form>
       </CardBody>
-      <CardFooter>footer</CardFooter>
+      {/* <CardFooter>footer</CardFooter> */}
     </Card>
   );
 }
