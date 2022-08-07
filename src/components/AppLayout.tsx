@@ -1,31 +1,53 @@
 import {
-  Masthead,
-  MastheadBrand,
-  MastheadContent,
-  MastheadMain,
+  Nav,
+  NavItem,
+  NavList,
   Page,
+  PageHeader,
   PageSection,
   PageSectionVariants,
 } from "@patternfly/react-core";
-
+import { AppTabs } from "../enum/appTabs";
+import { NavLink } from "react-router-dom";
 interface IAppLayout {
   children: React.ReactNode;
 }
 export const mainContentId = "main-content-page-layout";
 
 export function AppLayout({ children }: IAppLayout) {
-  const header = (
-    <Masthead id="basic">
-      <MastheadMain>
-        <MastheadBrand>Logo</MastheadBrand>
-      </MastheadMain>
-      <MastheadContent>
-        <span>Content</span>
-      </MastheadContent>
-    </Masthead>
+  const logoProps = {
+    href: "/",
+  };
+
+  const PageNav = (
+    <Nav
+      className="home-tabs"
+      id="nav-primary-simple"
+      aria-label="Nav"
+      variant="horizontal"
+    >
+      <NavList id="nav-list-simple">
+        <NavItem itemId={AppTabs.HOME.id}>
+          <NavLink to={`${AppTabs.HOME.path}`}>{AppTabs.HOME.label}</NavLink>
+        </NavItem>
+        <NavItem itemId={AppTabs.CFP_FORM.id}>
+          <NavLink to={`${AppTabs.CFP_FORM.path}`}>
+            {AppTabs.CFP_FORM.label}
+          </NavLink>
+        </NavItem>
+      </NavList>
+    </Nav>
+  );
+  const Header = (
+    <PageHeader
+      logoProps={logoProps}
+      logo="Logo"
+      className="cfp-guru-navbar"
+      topNav={PageNav}
+    />
   );
   return (
-    <Page sidebar={null} mainContainerId={mainContentId} header={header}>
+    <Page mainContainerId={mainContentId} header={Header}>
       <PageSection variant={PageSectionVariants.light}>{children}</PageSection>
     </Page>
   );
