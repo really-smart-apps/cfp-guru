@@ -16,61 +16,12 @@ import { useEffect, useState } from "react";
 import { ConferenceAttendeeMembers } from "../enum/conferenceAttendeeMembers";
 import { ConferenceCommitteeMembers } from "../enum/conferenceCommitteeMembers";
 import { ConferenceTypes } from "../enum/conferenceTypes";
-import { getCacheValue, IBaseCache } from "../utils/cacheUtils";
 import {
-  CFPFormCacheNamespaces,
-  CfpFormCacheUtils,
-} from "../utils/cfpFormCacheUtils";
-
-interface IConferenceFormState {
-  conferenceType: ConferenceTypes;
-  conferenceCommitteeMember: ConferenceCommitteeMembers;
-  conferenceAttendeeMember: ConferenceAttendeeMembers;
-  problem: string;
-  problemReason: string;
-  title: string;
-  titleProblemSolution: string;
-  takeways: string;
-}
-
-const initialConfFormState: IConferenceFormState = {
-  conferenceType: ConferenceTypes.FREE,
-  conferenceCommitteeMember: ConferenceCommitteeMembers.EXPERT_DOMAIN,
-  conferenceAttendeeMember: ConferenceAttendeeMembers.DIVERSE_INSIGHTS,
-  problem: "",
-  problemReason: "",
-  title: "",
-  titleProblemSolution: "",
-  takeways: "",
-};
-
-export async function getCfpFormCache(): Promise<IConferenceFormState> {
-  try {
-    const cacheValue = await CfpFormCacheUtils.get<
-      IBaseCache<IConferenceFormState>
-    >(CFPFormCacheNamespaces.CFP_FORM.name, "cfpform");
-
-    return getCacheValue(cacheValue);
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-export async function setCfpFormCache(
-  value: IConferenceFormState
-): Promise<void> {
-  try {
-    await CfpFormCacheUtils.set(
-      CFPFormCacheNamespaces.CFP_FORM.name,
-      "cfpform",
-      {
-        value: value,
-      }
-    );
-  } catch (e) {
-    console.error(e);
-  }
-}
+  getCfpFormCache,
+  IConferenceFormState,
+  initialConfFormState,
+  setCfpFormCache,
+} from "./CFPFormHelper";
 
 export function CFPForm() {
   const [conferenceFormState, setConferenceFormState] =
@@ -89,6 +40,7 @@ export function CFPForm() {
     getCacheValue();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const onUpdateValue = (key: string, value: any) => {
     const updatedObject = {
       ...conferenceFormState,
@@ -97,12 +49,15 @@ export function CFPForm() {
     setConferenceFormState(updatedObject);
     setCfpFormCache(updatedObject);
   };
+
   const handleProblemChange = (text: string) => {
     onUpdateValue("problem", text);
   };
+
   const handleProblemReasonChange = (text: string) => {
     onUpdateValue("problemReason", text);
   };
+
   const handleTitleChange = (text: string) => {
     onUpdateValue("title", text);
   };

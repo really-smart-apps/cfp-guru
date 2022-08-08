@@ -9,6 +9,7 @@ import {
 } from "@patternfly/react-core";
 import { AppTabs } from "../enum/appTabs";
 import { NavLink } from "react-router-dom";
+import { keys, map } from "lodash";
 interface IAppLayout {
   children: React.ReactNode;
 }
@@ -27,19 +28,14 @@ export function AppLayout({ children }: IAppLayout) {
       variant="horizontal"
     >
       <NavList id="nav-list-simple">
-        <NavItem itemId={AppTabs.HOME.id}>
-          <NavLink to={`${AppTabs.HOME.path}`}>{AppTabs.HOME.label}</NavLink>
-        </NavItem>
-        <NavItem itemId={AppTabs.CFP_FORM.id}>
-          <NavLink to={`${AppTabs.CFP_FORM.path}`}>
-            {AppTabs.CFP_FORM.label}
-          </NavLink>
-        </NavItem>
-        <NavItem itemId={AppTabs.ABOUT_US.id}>
-          <NavLink to={`${AppTabs.ABOUT_US.path}`}>
-            {AppTabs.ABOUT_US.label}
-          </NavLink>
-        </NavItem>
+        {map(keys(AppTabs), (key) => {
+          const tab = AppTabs[key];
+          return (
+            <NavItem key={tab.id} itemId={tab.id}>
+              <NavLink to={`${tab.path}`}>{tab.label}</NavLink>
+            </NavItem>
+          );
+        })}
       </NavList>
     </Nav>
   );
