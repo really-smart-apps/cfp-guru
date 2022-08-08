@@ -7,11 +7,11 @@ export const AppTabs = {
   CFP_FORM: {
     id: "cfpForm",
     label: "Form",
-    path: "/cfpForm",
+    path: "/cfpform",
   },
   ABOUT_US: {
     id: "aboutUs",
     label: "About",
-    path: "/aboutUs",
+    path: "/aboutus",
   },
 };
