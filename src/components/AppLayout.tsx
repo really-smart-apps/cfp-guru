@@ -5,8 +5,6 @@ import {
   Page,
   PageHeader,
   PageSection,
-  Popover,
-  PopoverPosition,
   PageSectionVariants,
 } from "@patternfly/react-core";
 import { AppTabs } from "../enum/appTabs";
