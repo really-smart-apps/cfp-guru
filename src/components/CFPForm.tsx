@@ -22,6 +22,10 @@ import {
   initialConfFormState,
   setCfpFormCache,
 } from "./CFPFormHelper";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 export function CFPForm() {
   const [conferenceFormState, setConferenceFormState] =
@@ -93,6 +97,27 @@ export function CFPForm() {
     setConferenceFormState(initialConfFormState);
     setCfpFormCache(initialConfFormState);
   };
+
+  const generatePDF = () => {
+    const dd = {
+      content: [
+        {
+          text: `${conferenceFormState.title}\n`,
+          style: 'header',
+          alignment: 'center'
+        },
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true
+        },
+      }
+      
+    }
+    pdfMake.createPdf(dd).open();
+    
+  }
 
   const renderConferenceTypeComponent = () => {
     return (
@@ -264,6 +289,9 @@ export function CFPForm() {
             </Button>
             <Button onClick={onCancelForm} variant="link">
               Cancel
+            </Button>
+            <Button onClick={generatePDF} variant="primary">
+              Download PDF
             </Button>
           </ActionGroup>
         </Form>
