@@ -3,7 +3,6 @@ import {
   Button,
   Card,
   CardBody,
-  // CardFooter,
   CardTitle,
   Form,
   FormGroup,
@@ -22,17 +21,16 @@ import {
   initialConfFormState,
   setCfpFormCache,
 } from "./CFPFormHelper";
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import { CFPPreviewModal } from "./CFPPreviewModal";
 
 export function CFPForm() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [conferenceFormState, setConferenceFormState] =
     useState<IConferenceFormState>(initialConfFormState);
   const isFreeTypeSelected =
     ConferenceTypes.FREE === conferenceFormState.conferenceType;
 
+  const handleModalToggle = () => setIsModalOpen(!isModalOpen);
   const getCacheValue = async () => {
     const cacheValue: IConferenceFormState = await getCfpFormCache();
     setConferenceFormState({
@@ -89,35 +87,10 @@ export function CFPForm() {
     onUpdateValue("titleProblemSolution", text);
   };
 
-  const onSubmitForm = () => {
-    console.log(conferenceFormState);
-  };
-
   const onCancelForm = () => {
     setConferenceFormState(initialConfFormState);
     setCfpFormCache(initialConfFormState);
   };
-
-  const generatePDF = () => {
-    const dd = {
-      content: [
-        {
-          text: `${conferenceFormState.title}\n`,
-          style: 'header',
-          alignment: 'center'
-        },
-      ],
-      styles: {
-        header: {
-          fontSize: 18,
-          bold: true
-        },
-      }
-      
-    }
-    pdfMake.createPdf(dd).open();
-    
-  }
 
   const renderConferenceTypeComponent = () => {
     return (
@@ -202,101 +175,113 @@ export function CFPForm() {
     );
   };
 
+  const getHelpTextForProblemTextarea = () => {
+    const text = `Just the problem" and why is it a problem for the average`;
+    if (isFreeTypeSelected) {
+      return `${text} Organizer/Jury member who is ${conferenceFormState.conferenceCommitteeMember}`;
+    } else {
+      return `${text} attendee who is here for ${conferenceFormState.conferenceAttendeeMember}`;
+    }
+  };
+
   return (
-    <Card isPlain>
-      <CardTitle>Abstract generator</CardTitle>
-      <CardBody>
-        <Form isWidthLimited>
-          {renderConferenceTypeComponent()}
-          {isFreeTypeSelected && renderFreeConferenceTypeComponent()}
-          {!isFreeTypeSelected && renderPaidConferenceTypeComponent()}
-          <FormGroup
-            label="Describe the problem that your submission tries to address"
-            fieldId="confProblemTextarea"
-            isRequired
-            helperText={`"Just the problem" and why is it a problem for the average Organizer/Jury member <use selected radio from previous question>`}
-          >
-            <TextArea
-              value={conferenceFormState.problem}
-              onChange={handleProblemChange}
-              id="confProblemTextarea"
-              name="confProblemTextarea"
-            />
-          </FormGroup>
-
-          <FormGroup
-            label="Reasons for the problem"
-            fieldId="confProblemReasonTextarea"
-            helperText={`Describe the reasons (preferably in a list) that cause the problem that your paper tries to address`}
-            isRequired
-          >
-            <TextArea
-              value={conferenceFormState.problemReason}
-              onChange={handleProblemReasonChange}
-              id="confProblemReasonTextarea"
-              name="confProblemReasonTextarea"
-            />
-          </FormGroup>
-
-          <FormGroup
-            label="Title of the paper"
-            helperText="Name your paper in a way that addresses all the reasons that you listed in last question"
-            fieldId="confTitle"
-            isRequired
-          >
-            <TextInput
-              value={conferenceFormState.title}
+    <>
+      <Card isPlain>
+        <CardTitle>Abstract generator</CardTitle>
+        <CardBody>
+          <Form isWidthLimited>
+            {renderConferenceTypeComponent()}
+            {isFreeTypeSelected && renderFreeConferenceTypeComponent()}
+            {!isFreeTypeSelected && renderPaidConferenceTypeComponent()}
+            <FormGroup
+              label="Describe the problem that your submission tries to address"
+              fieldId="confProblemTextarea"
               isRequired
-              onChange={handleTitleChange}
-              id="confTitle"
-              name="confTitle"
-              type="text"
-              aria-describedby="Conference Title"
-            />
-          </FormGroup>
+              helperText={getHelpTextForProblemTextarea()}
+            >
+              <TextArea
+                value={conferenceFormState.problem}
+                onChange={handleProblemChange}
+                id="confProblemTextarea"
+                name="confProblemTextarea"
+              />
+            </FormGroup>
 
-          <FormGroup
-            label="Describe how your title is actually solving the problems you listed in question 3."
-            helperText="You can use - real world experience reports, case studies, research papers or your analysis as arguements."
-            fieldId="confTitleExplanation"
-            isRequired
-          >
-            <TextArea
-              value={conferenceFormState.titleProblemSolution}
-              onChange={handleTitleProblemSolutionChange}
-              id="confTitleExplanation"
-              name="confTitleExplanation"
-            />
-          </FormGroup>
+            <FormGroup
+              label="Reasons for the problem"
+              fieldId="confProblemReasonTextarea"
+              helperText={`Describe the reasons (preferably in a list) that cause the problem that your paper tries to address`}
+              isRequired
+            >
+              <TextArea
+                value={conferenceFormState.problemReason}
+                onChange={handleProblemReasonChange}
+                id="confProblemReasonTextarea"
+                name="confProblemReasonTextarea"
+              />
+            </FormGroup>
 
-          <FormGroup
-            label="Takeways"
-            helperText="Repeat the top 3 key lessons from your paper."
-            fieldId="conf3Takeways"
-            isRequired
-          >
-            <TextArea
-              value={conferenceFormState.takeways}
-              onChange={handleTakewaysChange}
-              id="conf3Takeways"
-              name="conf3Takeways"
-            />
-          </FormGroup>
+            <FormGroup
+              label="Title of the paper"
+              helperText="Name your paper in a way that addresses all the reasons that you listed in last question"
+              fieldId="confTitle"
+              isRequired
+            >
+              <TextInput
+                value={conferenceFormState.title}
+                isRequired
+                onChange={handleTitleChange}
+                id="confTitle"
+                name="confTitle"
+                type="text"
+                aria-describedby="Conference Title"
+              />
+            </FormGroup>
 
-          <ActionGroup>
-            <Button onClick={onSubmitForm} variant="primary">
-              Submit
-            </Button>
-            <Button onClick={onCancelForm} variant="link">
-              Cancel
-            </Button>
-            <Button onClick={generatePDF} variant="primary">
-              Download PDF
-            </Button>
-          </ActionGroup>
-        </Form>
-      </CardBody>
-      {/* <CardFooter>footer</CardFooter> */}
-    </Card>
+            <FormGroup
+              label="Describe how your title is actually solving the problems you listed in question 3."
+              helperText="You can use - real world experience reports, case studies, research papers or your analysis as arguements."
+              fieldId="confTitleExplanation"
+              isRequired
+            >
+              <TextArea
+                value={conferenceFormState.titleProblemSolution}
+                onChange={handleTitleProblemSolutionChange}
+                id="confTitleExplanation"
+                name="confTitleExplanation"
+              />
+            </FormGroup>
+
+            <FormGroup
+              label="Takeways"
+              helperText="Repeat the top 3 key lessons from your paper."
+              fieldId="conf3Takeways"
+              isRequired
+            >
+              <TextArea
+                value={conferenceFormState.takeways}
+                onChange={handleTakewaysChange}
+                id="conf3Takeways"
+                name="conf3Takeways"
+              />
+            </FormGroup>
+
+            <ActionGroup>
+              <Button onClick={handleModalToggle} variant="primary">
+                Preview
+              </Button>
+              <Button onClick={onCancelForm} variant="link">
+                Cancel
+              </Button>
+            </ActionGroup>
+          </Form>
+        </CardBody>
+      </Card>
+      <CFPPreviewModal
+        isModalOpen={isModalOpen}
+        handleModalToggle={handleModalToggle}
+        conferenceFormState={conferenceFormState}
+      />
+    </>
   );
 }
